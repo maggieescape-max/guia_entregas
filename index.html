@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buscador de Polígonos</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; }
+        #search {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            z-index: 1000;
+            width: 300px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="search">
+        <input type="text" id="searchInput" placeholder="Buscar por CVE_CAT..." style="width: 100%; padding: 8px;">
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="datos.geojson"></script>
+    <script>
+        // Mapa base
+        var map = L.map('map').setView([22.43, -97.89], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Cargar GeoJSON
+        fetch('datos.geojson')
+            .then(response => response.json())
+            .then(data => {
+                var polygons = L.geoJSON(data, {
+                    style: { color: 'blue', fillOpacity: 0.3 },
+                    onEachFeature: function(feature, layer) {
+                        layer.bindPopup('CVE_CAT: ' + feature.properties.CVE_CAT);
+                    }
+                }).addTo(map);
+
+                // Buscador exacto
+                document.getElementById('searchInput').addEventListener('input', function(e) {
+                    var value = e.target.value.trim();
+                    polygons.eachLayer(function(layer) {
+                        if (layer.feature.properties.CVE_CAT === value) {
+                            map.setView(layer.getBounds().getCenter(), 15);
+                            layer.openPopup();
+                        }
+                    });
+                });
+            });
+    </script>
+</body>
+</html>
