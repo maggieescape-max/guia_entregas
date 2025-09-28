@@ -3,18 +3,46 @@
 <head>
     <title>Buscador de Polígonos</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        #map { height: 100vh; }
+        #map { 
+            height: 100vh; 
+            width: 100%;
+        }
         #search {
             position: absolute;
             top: 10px;
-            left: 50px;
+            left: 10px;
             z-index: 1000;
-            width: 320px;
             background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: 400px;
+        }
+        /* Para móviles */
+        @media (max-width: 768px) {
+            #search {
+                width: 85%;
+                padding: 10px;
+                left: 5%;
+                right: 5%;
+            }
+            #searchInput, #mapSelector {
+                font-size: 16px !important; /* Evita zoom en iOS */
+                padding: 12px !important;
+            }
+        }
+        /* Para pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            #search {
+                width: 90%;
+                padding: 8px;
+            }
+            .polygon-label {
+                font-size: 10px !important;
+            }
         }
         .polygon-label {
             font-weight: bold;
@@ -23,19 +51,34 @@
             pointer-events: none;
             text-align: center;
         }
+        #searchInput, #mapSelector {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+        }
+        #result {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            min-height: 18px;
+        }
     </style>
 </head>
 <body>
     <div id="search">
-        <input type="text" id="searchInput" placeholder="Buscar por Clave Mnz..." style="width: 100%; padding: 8px;">
-        <div id="result" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+        <input type="text" id="searchInput" placeholder="Buscar por CVE_CAT...">
         
-        <!-- SELECTOR DE MAPAS BASE -->
-        <select id="mapSelector" style="margin-top: 10px; width: 100%; padding: 8px; font-size: 14px;">
+        <select id="mapSelector">
             <option value="osm">🗺️ Calles (OpenStreetMap)</option>
             <option value="satelite">🛰️ Vista Satélite</option>
             <option value="hibrido">🔀 Híbrido (Calles + Satélite)</option>
         </select>
+        
+        <div id="result"></div>
     </div>
     
     <div id="map"></div>
@@ -69,7 +112,7 @@
             .then(data => {
                 var polygons = L.geoJSON(data, {
                     style: { 
-                        color: 'fuchsia', 
+                        color: 'blue', 
                         weight: 2,
                         fillColor: 'transparent',
                         fillOpacity: 0
@@ -88,7 +131,7 @@
                     }
                 }).addTo(map);
 
-                // Buscador exacto (existente)
+                // Buscador exacto
                 document.getElementById('searchInput').addEventListener('input', function(e) {
                     var value = e.target.value.trim();
                     var found = false;
@@ -120,14 +163,11 @@
                     }
                 });
 
-                // **NUEVO: SELECTOR DE MAPAS BASE**
+                // Selector de mapas base
                 document.getElementById('mapSelector').addEventListener('change', function(e) {
-                    // Remover todos los mapas base
                     Object.values(baseMaps).forEach(function(layer) {
                         map.removeLayer(layer);
                     });
-                    
-                    // Añadir el mapa base seleccionado
                     baseMaps[e.target.value].addTo(map);
                 });
 
