@@ -11,7 +11,7 @@
         }
         #search {
             position: absolute;
-            top: 10px;
+            top: 20px;
             left: 10px;
             z-index: 1000;
             background: white;
@@ -28,20 +28,11 @@
                 padding: 10px;
                 left: 5%;
                 right: 5%;
+                top: 15px;
             }
-            #searchInput, #mapSelector {
-                font-size: 16px !important; /* Evita zoom en iOS */
+            #searchInput, #mapSelector, #gpsButton {
+                font-size: 16px !important;
                 padding: 12px !important;
-            }
-        }
-        /* Para pantallas muy pequeñas */
-        @media (max-width: 480px) {
-            #search {
-                width: 90%;
-                padding: 8px;
-            }
-            .polygon-label {
-                font-size: 10px !important;
             }
         }
         .polygon-label {
@@ -60,11 +51,32 @@
             margin-bottom: 8px;
             box-sizing: border-box;
         }
+        #gpsButton {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px; /* Más grande para el emoji */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+        #gpsButton:hover {
+            background: #0056b3;
+        }
+        #gpsButton.locating {
+            background: #28a745;
+        }
         #result {
             font-size: 14px;
-            color: #666;
+            color: #d9534f;
             margin-top: 5px;
             min-height: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -77,6 +89,9 @@
             <option value="satelite">🛰️ Vista Satélite</option>
             <option value="hibrido">🔀 Híbrido (Calles + Satélite)</option>
         </select>
+
+        <!-- BOTÓN GPS SOLO CON EMOJI -->
+        <button id="gpsButton" type="button">📍</button>
         
         <div id="result"></div>
     </div>
@@ -106,6 +121,9 @@
         // Añadir mapa base por defecto
         baseMaps["osm"].addTo(map);
 
+        // VARIABLE PARA CONTROLAR MARCADOR GPS
+        var gpsMarker = null;
+
         // Cargar GeoJSON
         fetch('datos.geojson')
             .then(response => response.json())
@@ -131,7 +149,7 @@
                     }
                 }).addTo(map);
 
-                // Buscador exacto
+                // Buscador exacto - SOLO MENSAJE DE ERROR
                 document.getElementById('searchInput').addEventListener('input', function(e) {
                     var value = e.target.value.trim();
                     var found = false;
@@ -152,7 +170,7 @@
                             });
                             layer.openPopup();
                             found = true;
-                            document.getElementById('result').innerHTML = "✓ Polígono encontrado";
+                            document.getElementById('result').innerHTML = "";
                         }
                     });
                     
@@ -169,6 +187,42 @@
                         map.removeLayer(layer);
                     });
                     baseMaps[e.target.value].addTo(map);
+                });
+
+                // BOTÓN GPS - SOLO EMOJI
+                document.getElementById('gpsButton').addEventListener('click', function() {
+                    var button = this;
+                    button.textContent = "🔄";
+                    button.classList.add('locating');
+                    
+                    map.locate({ 
+                        setView: true, 
+                        maxZoom: 16,
+                        timeout: 10000 
+                    });
+                });
+
+                // Eventos de geolocalización
+                map.on('locationfound', function(e) {
+                    document.getElementById('gpsButton').textContent = "📍";
+                    document.getElementById('gpsButton').classList.remove('locating');
+                    
+                    // Eliminar marcador anterior si existe
+                    if (gpsMarker) {
+                        map.removeLayer(gpsMarker);
+                    }
+                    
+                    // Crear nuevo marcador
+                    gpsMarker = L.marker(e.latlng)
+                        .addTo(map)
+                        .bindPopup("📍 Estás aquí")
+                        .openPopup();
+                });
+
+                map.on('locationerror', function(e) {
+                    document.getElementById('gpsButton').textContent = "📍";
+                    document.getElementById('gpsButton').classList.remove('locating');
+                    document.getElementById('result').innerHTML = "❌ Error de GPS";
                 });
 
             })
