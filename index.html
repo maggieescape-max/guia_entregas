@@ -10,45 +10,131 @@
             top: 10px;
             left: 50px;
             z-index: 1000;
-            width: 300px;
+            width: 320px;
+            background: white;
             padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .polygon-label {
+            font-weight: bold;
+            font-size: 11px;
+            text-shadow: 1px 1px 2px white;
+            pointer-events: none;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div id="search">
-        <input type="text" id="searchInput" placeholder="Buscar por CVE_CAT..." style="width: 100%; padding: 8px;">
+        <input type="text" id="searchInput" placeholder="Buscar por Clave Mnz..." style="width: 100%; padding: 8px;">
+        <div id="result" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+        
+        <!-- SELECTOR DE MAPAS BASE -->
+        <select id="mapSelector" style="margin-top: 10px; width: 100%; padding: 8px; font-size: 14px;">
+            <option value="osm">🗺️ Calles (OpenStreetMap)</option>
+            <option value="satelite">🛰️ Vista Satélite</option>
+            <option value="hibrido">🔀 Híbrido (Calles + Satélite)</option>
+        </select>
     </div>
+    
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="datos.geojson"></script>
     <script>
-        // Mapa base
+        // Mapa base inicial
         var map = L.map('map').setView([22.43, -97.89], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // DEFINIR LOS DIFERENTES MAPAS BASE
+        var baseMaps = {
+            "osm": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }),
+            "satelite": L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                subdomains: ['mt0','mt1','mt2','mt3'],
+                attribution: '© Google'
+            }),
+            "hibrido": L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                subdomains: ['mt0','mt1','mt2','mt3'],
+                attribution: '© Google'
+            })
+        };
+
+        // Añadir mapa base por defecto
+        baseMaps["osm"].addTo(map);
 
         // Cargar GeoJSON
         fetch('datos.geojson')
             .then(response => response.json())
             .then(data => {
                 var polygons = L.geoJSON(data, {
-                    style: { color: 'blue', fillOpacity: 0.3 },
+                    style: { 
+                        color: 'fuchsia', 
+                        weight: 2,
+                        fillColor: 'transparent',
+                        fillOpacity: 0
+                    },
                     onEachFeature: function(feature, layer) {
                         layer.bindPopup('CVE_CAT: ' + feature.properties.CVE_CAT);
+                        
+                        var center = layer.getBounds().getCenter();
+                        var label = L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'polygon-label',
+                                html: feature.properties.CVE_CAT,
+                                iconSize: [100, 20]
+                            })
+                        }).addTo(map);
                     }
                 }).addTo(map);
 
-                // Buscador exacto
+                // Buscador exacto (existente)
                 document.getElementById('searchInput').addEventListener('input', function(e) {
                     var value = e.target.value.trim();
+                    var found = false;
+                    
                     polygons.eachLayer(function(layer) {
+                        layer.setStyle({color: 'blue', weight: 2});
+                        
                         if (layer.feature.properties.CVE_CAT === value) {
-                            map.setView(layer.getBounds().getCenter(), 15);
+                            map.fitBounds(layer.getBounds(), { 
+                                padding: [20, 20],
+                                maxZoom: 17
+                            });
+                            layer.setStyle({
+                                color: 'red', 
+                                weight: 4,
+                                fillColor: 'rgba(255,0,0,0.1)',
+                                fillOpacity: 0.2
+                            });
                             layer.openPopup();
+                            found = true;
+                            document.getElementById('result').innerHTML = "✓ Polígono encontrado";
                         }
                     });
+                    
+                    if (!found && value !== '') {
+                        document.getElementById('result').innerHTML = "✗ No se encontró '" + value + "'";
+                    } else if (value === '') {
+                        document.getElementById('result').innerHTML = "";
+                    }
                 });
+
+                // **NUEVO: SELECTOR DE MAPAS BASE**
+                document.getElementById('mapSelector').addEventListener('change', function(e) {
+                    // Remover todos los mapas base
+                    Object.values(baseMaps).forEach(function(layer) {
+                        map.removeLayer(layer);
+                    });
+                    
+                    // Añadir el mapa base seleccionado
+                    baseMaps[e.target.value].addTo(map);
+                });
+
+            })
+            .catch(error => {
+                console.error('Error cargando GeoJSON:', error);
+                document.getElementById('result').innerHTML = "Error cargando datos";
             });
     </script>
 </body>
