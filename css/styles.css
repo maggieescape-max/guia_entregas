@@ -278,3 +278,24 @@
 #qrScanner button:active {
     transform: translateY(0);
 }
+
+.team-label {
+    font-weight: bold;
+    pointer-events: none;
+    text-align: center;
+}
+
+/* Asegurar que las etiquetas de equipo se vean bien */
+.team-label div {
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    color: #ff00ff !important;
+    text-shadow: 
+        2px 2px 4px white,
+        -2px -2px 4px white,
+        2px -2px 4px white,
+        -2px 2px 4px white !important;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
