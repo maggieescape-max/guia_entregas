@@ -1,4 +1,4 @@
-// Escáner QR inteligente
+// Escáner QR inteligente - VERSIÓN CORREGIDA
 class QRScanner {
     constructor() {
         this.stream = null;
@@ -18,6 +18,7 @@ class QRScanner {
     iniciarQRScanner() {
         document.getElementById('qrModal').style.display = 'flex';
         document.getElementById('qrButton').classList.add('scanning');
+        document.getElementById('result').innerHTML = ""; // Limpiar mensajes anteriores
         
         const video = document.getElementById('qrVideo');
         
@@ -53,6 +54,11 @@ class QRScanner {
                     document.getElementById('searchInput').value = cveCat;
                     window.searchEngine.buscarPoligono(cveCat);
                     this.stopQRScanner();
+                    // NO mostrar mensaje de éxito - el highlight rojo es suficiente
+                } else {
+                    document.getElementById('result').innerHTML = "❌ Formato QR no válido";
+                    // Cerrar automáticamente después de 2 segundos
+                    setTimeout(() => this.stopQRScanner(), 2000);
                 }
             }
         }
@@ -84,5 +90,13 @@ class QRScanner {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
+        
+        // Limpiar mensajes de error después de cerrar
+        setTimeout(() => {
+            if (document.getElementById('result').innerHTML.includes("Error") || 
+                document.getElementById('result').innerHTML.includes("no válido")) {
+                document.getElementById('result').innerHTML = "";
+            }
+        }, 3000);
     }
 }

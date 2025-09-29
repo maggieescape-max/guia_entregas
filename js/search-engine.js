@@ -1,4 +1,4 @@
-// Motor de búsqueda de polígonos
+// Motor de búsqueda de polígonos - VERSIÓN MEJORADA
 class SearchEngine {
     constructor(polygons) {
         this.polygons = polygons;
@@ -35,12 +35,28 @@ class SearchEngine {
                 layer.openPopup();
                 found = true;
                 document.getElementById('result').innerHTML = "";
+                
+                // AUTOLIMPIEZA después de 5 segundos (solo el mensaje de éxito)
+                setTimeout(() => {
+                    if (document.getElementById('result').innerHTML === "") {
+                        // Solo limpiar el input si no hay mensaje de error
+                        document.getElementById('searchInput').value = "";
+                    }
+                }, 5000);
             }
         });
         
         if (!found && valorLimpio !== '') {
             console.log("❌ Polígono NO encontrado");
             document.getElementById('result').innerHTML = "✗ No se encontró '" + valorLimpio + "'";
+            
+            // AUTOLIMPIEZA del mensaje de error después de 3 segundos
+            setTimeout(() => {
+                if (document.getElementById('result').innerHTML.includes("No se encontró")) {
+                    document.getElementById('result').innerHTML = "";
+                    document.getElementById('searchInput').value = "";
+                }
+            }, 3000);
         } else if (valorLimpio === '') {
             document.getElementById('result').innerHTML = "";
         }
