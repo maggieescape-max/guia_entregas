@@ -109,16 +109,22 @@ class MapLoader {
         });
     }
 
-    // Etiqueta para polígonos de búsqueda - CON VALIDACIÓN
+    // Versión ultra-segura... Etiqueta para polígonos de búsqueda - CON VALIDACIÓN
     addPolygonLabel(feature, layer, texto) {
         try {
-            // VALIDAR que el polígono tenga bounds válidos
-            if (!layer.getBounds || !layer.getBounds().isValid()) {
-                console.warn("Polígono sin geometría válida:", feature.properties);
+            // Doble validación por si las moscas
+            if (!layer || !layer.getBounds) {
+                console.warn("Layer inválido:", feature.properties);
                 return;
             }
         
-            var center = layer.getBounds().getCenter();
+            const bounds = layer.getBounds();
+            if (!bounds || !bounds.isValid()) {
+                console.warn("Bounds inválidos:", feature.properties);
+                return;
+            }
+        
+            var center = bounds.getCenter();
             var label = L.marker(center, {
                 icon: L.divIcon({
                     className: 'polygon-label',
@@ -126,8 +132,9 @@ class MapLoader {
                     iconSize: [100, 20]
                 })
             }).addTo(this.map);
+        
         } catch (error) {
-            console.warn("Error creando etiqueta para polígono:", feature.properties, error);
+            console.warn("Error creando etiqueta:", feature.properties, error);
         }
     }
 
