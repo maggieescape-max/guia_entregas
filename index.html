@@ -27,8 +27,18 @@
     <div id="qrModal">
         <div id="qrScanner">
             <h3>Escanear QR</h3>
+
+            <!-- Puntos de esquina -->
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+
+            <!-- Línea de escaneo animada -->
+            <div class="scan-line"></div>
+
             <video id="qrVideo"></video>
-            <div style="margin-top: 10px;">
+            <div style="margin-top: 15px;">
                 <button id="cancelQR">Cancelar</button>
             </div>
         </div>
