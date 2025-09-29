@@ -21,24 +21,22 @@ class SearchEngine {
 
     ejecutarBusqueda() {
         const valor = document.getElementById('searchInput').value;
-        this.buscarPoligono(valor);
+        const valorLimpio = valor.trim();
+        
+        // ELIMINAR la validación de vacío - buscar siempre que presionen el botón
+        this.buscarPoligono(valorLimpio);
     }
 
-    buscarPoligono(valor) {
+    buscarPoligono(valorLimpio) {
         var found = false;
-        var valorLimpio = valor.trim();
         
+        console.log("Buscando CVE_CAT:", valorLimpio);
+        
+        // Si está vacío, simplemente no hace nada (no muestra error)
         if (valorLimpio === '') {
-            document.getElementById('result').innerHTML = "⚠️ Ingresa Clave";
-            setTimeout(() => {
-                if (document.getElementById('result').innerHTML === "⚠️ Ingresa Clave") {
-                    document.getElementById('result').innerHTML = "";
-                }
-            }, 3000);
+            document.getElementById('result').innerHTML = "";
             return false;
         }
-        
-        console.log("Buscando Clave", valorLimpio);
         
         this.polygons.eachLayer((layer) => {
             layer.setStyle({color: 'blue', weight: 2});
@@ -59,23 +57,20 @@ class SearchEngine {
                 found = true;
                 document.getElementById('result').innerHTML = "";
                 
-                // AUTOLIMPIEZA INTELIGENTE: solo después de éxito, con delay
+                // AUTOLIMPIEZA después de éxito
                 setTimeout(() => {
                     document.getElementById('searchInput').value = "";
-                    document.getElementById('searchInput').focus(); // Opcional: mantener foco
-                }, 1000); // 1 segundo después del éxito
+                }, 1000);
             }
         });
         
-        if (!found) {
+        if (!found && valorLimpio !== '') {
             console.log("❌ Polígono NO encontrado");
             document.getElementById('result').innerHTML = "✗ No se encontró '" + valorLimpio + "'";
             
-            // NO limpiar el input en error - el usuario puede corregir
+            // NO limpiar input en error - usuario puede corregir
             setTimeout(() => {
-                if (document.getElementById('result').innerHTML.includes("No se encontró")) {
-                    document.getElementById('result').innerHTML = "";
-                }
+                document.getElementById('result').innerHTML = "";
             }, 5000);
         }
         
