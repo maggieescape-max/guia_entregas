@@ -6,16 +6,39 @@ class SearchEngine {
     }
 
     setupSearch() {
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.buscarPoligono(e.target.value);
+        // Buscar al presionar ENTER
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.ejecutarBusqueda();
+            }
         });
+        
+        // Buscar al hacer click en el botón
+        document.getElementById('searchButton').addEventListener('click', () => {
+            this.ejecutarBusqueda();
+        });
+    }
+
+    ejecutarBusqueda() {
+        const valor = document.getElementById('searchInput').value;
+        this.buscarPoligono(valor);
     }
 
     buscarPoligono(valor) {
         var found = false;
         var valorLimpio = valor.trim();
         
-        console.log("Buscando CVE_CAT:", valorLimpio);
+        if (valorLimpio === '') {
+            document.getElementById('result').innerHTML = "⚠️ Ingresa Clave";
+            setTimeout(() => {
+                if (document.getElementById('result').innerHTML === "⚠️ Ingresa Clave") {
+                    document.getElementById('result').innerHTML = "";
+                }
+            }, 3000);
+            return false;
+        }
+        
+        console.log("Buscando Clave", valorLimpio);
         
         this.polygons.eachLayer((layer) => {
             layer.setStyle({color: 'blue', weight: 2});
@@ -36,29 +59,24 @@ class SearchEngine {
                 found = true;
                 document.getElementById('result').innerHTML = "";
                 
-                // AUTOLIMPIEZA después de 5 segundos (solo el mensaje de éxito)
+                // AUTOLIMPIEZA INTELIGENTE: solo después de éxito, con delay
                 setTimeout(() => {
-                    if (document.getElementById('result').innerHTML === "") {
-                        // Solo limpiar el input si no hay mensaje de error
-                        document.getElementById('searchInput').value = "";
-                    }
-                }, 5000);
+                    document.getElementById('searchInput').value = "";
+                    document.getElementById('searchInput').focus(); // Opcional: mantener foco
+                }, 1000); // 1 segundo después del éxito
             }
         });
         
-        if (!found && valorLimpio !== '') {
+        if (!found) {
             console.log("❌ Polígono NO encontrado");
             document.getElementById('result').innerHTML = "✗ No se encontró '" + valorLimpio + "'";
             
-            // AUTOLIMPIEZA del mensaje de error después de 3 segundos
+            // NO limpiar el input en error - el usuario puede corregir
             setTimeout(() => {
                 if (document.getElementById('result').innerHTML.includes("No se encontró")) {
                     document.getElementById('result').innerHTML = "";
-                    document.getElementById('searchInput').value = "";
                 }
-            }, 3000);
-        } else if (valorLimpio === '') {
-            document.getElementById('result').innerHTML = "";
+            }, 5000);
         }
         
         return found;
