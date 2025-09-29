@@ -76,8 +76,9 @@ class MapLoader {
                 },
                 onEachFeature: (feature, layer) => {
                     // IMPORTANTE: Usar 'cve_cat' en minúsculas
-                    const clave = feature.properties.cve_cat || feature.properties.CVE_CAT || 'N/A';
-                    layer.bindPopup('CVE_CAT: ' + clave);
+                    const clave = feature.properties.clavemnz || feature.properties.cve_cat || feature.properties.CVE_CAT || 'N/A';
+                    console.log("Propiedades del polígono:", feature.properties); // Para debug
+                    layer.bindPopup('Clave: ' + clave);
                     this.addPolygonLabel(feature, layer, clave);
                 }
             }).addTo(this.map);
