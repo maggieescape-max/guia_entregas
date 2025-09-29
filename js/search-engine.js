@@ -41,7 +41,7 @@ class SearchEngine {
         this.polygons.eachLayer((layer) => {
             layer.setStyle({color: 'blue', weight: 2});
             
-            if (layer.feature.properties.CVE_CAT === valorLimpio) {
+            if (layer.feature.properties.cve_cat === valorLimpio) {
                 console.log("✅ Polígono encontrado!");
                 window.mapLoader.getMap().fitBounds(layer.getBounds(), { 
                     padding: [20, 20],

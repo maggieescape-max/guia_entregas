@@ -5,7 +5,7 @@ class MapLoader {
         this.map = null;
         this.baseMaps = {};
         this.polygons = null;
-        this.equiposLayer = null; // NUEVA CAPA
+        this.equiposLayer = null;
         this.init();
     }
 
@@ -35,9 +35,18 @@ class MapLoader {
     loadGeoJSON() {
         // Cargar AMBAS capas simultáneamente
         Promise.all([
-            fetch('datos.geojson').then(r => r.json()),        // Capa búsqueda
-            fetch('equipos.geojson').then(r => r.json())       // NUEVA: Capa equipos
+            fetch('datos.geojson').then(r => {
+                if (!r.ok) throw new Error(`Error datos.geojson: ${r.status}`);
+                return r.json();
+            }),
+            fetch('equipos.geojson').then(r => {
+                if (!r.ok) throw new Error(`Error equipos.geojson: ${r.status}`);
+                return r.json();
+            })
         ]).then(([datosBusqueda, datosEquipos]) => {
+            
+            console.log("Capa búsqueda cargada:", datosBusqueda);
+            console.log("Capa equipos cargada:", datosEquipos);
             
             // CAPA 1: Polígonos de búsqueda (AZUL)
             this.polygons = L.geoJSON(datosBusqueda, {
@@ -48,22 +57,23 @@ class MapLoader {
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
-                    layer.bindPopup('CVE_CAT: ' + feature.properties.CVE_CAT);
-                    this.addPolygonLabel(feature, layer, 'blue');
+                    // IMPORTANTE: Usar 'cve_cat' en minúsculas
+                    const clave = feature.properties.cve_cat || feature.properties.CVE_CAT || 'N/A';
+                    layer.bindPopup('CVE_CAT: ' + clave);
+                    this.addPolygonLabel(feature, layer, clave);
                 }
             }).addTo(this.map);
 
             // CAPA 2: Áreas de equipos (ROSA FUCHSIA)
             this.equiposLayer = L.geoJSON(datosEquipos, {
                 style: { 
-                    color: '#ff00ff', // ROSA FUCHSIA
+                    color: '#ff00ff',
                     weight: 3,
                     fillColor: 'transparent',
-                    fillOpacity: 0,
-                    dashArray: '5, 5' // Líneas punteadas opcional
+                    fillOpacity: 0
+                    // dashArray: '5, 5' // Opcional - comenta si no te gusta
                 },
                 onEachFeature: (feature, layer) => {
-                    // Etiqueta más grande para número de equipo
                     this.addTeamLabel(feature, layer);
                 }
             }).addTo(this.map);
@@ -75,33 +85,42 @@ class MapLoader {
                     equipos: this.equiposLayer 
                 } 
             }));
+            
         }).catch(error => {
             console.error('Error cargando GeoJSON:', error);
-            document.getElementById('result').innerHTML = "Error cargando datos";
+            document.getElementById('result').innerHTML = "Error cargando datos: " + error.message;
         });
     }
 
     // Etiqueta para equipos (MÁS GRANDE)
     addTeamLabel(feature, layer) {
         var center = layer.getBounds().getCenter();
-        var teamNumber = feature.properties.numero_equipo || feature.properties.equipo || 'N/A';
+        // BUSCAR EN DIFERENTES CAMPOS POSIBLES
+        var teamNumber = featureperties.Name || 
+                        feature.properties.name || 
+                        feature.properties.NUMERO || 
+                        feature.properties.numero || 
+                        feature.properties.equipo || 
+                        'N/A';
+        
+        console.log("Etiqueta equipo - propiedades:", feature.properties);
         
         var label = L.marker(center, {
             icon: L.divIcon({
-                className: 'team-label', // CLASE DIFERENTE
+                className: 'team-label',
                 html: `<div style="font-size: 16px; font-weight: bold; color: #ff00ff; text-shadow: 2px 2px 4px white;">${teamNumber}</div>`,
                 iconSize: [40, 25]
             })
         }).addTo(this.map);
     }
 
-    // Etiqueta original para polígonos de búsqueda
-    addPolygonLabel(feature, layer, color = 'blue') {
+    // Etiqueta para polígonos de búsqueda
+    addPolygonLabel(feature, layer, texto) {
         var center = layer.getBounds().getCenter();
         var label = L.marker(center, {
             icon: L.divIcon({
                 className: 'polygon-label',
-                html: feature.properties.CVE_CAT,
+                html: texto,
                 iconSize: [100, 20]
             })
         }).addTo(this.map);
