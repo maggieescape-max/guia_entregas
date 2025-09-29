@@ -55,7 +55,7 @@
     font-size: 18px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    background: #007bff;
+    background: #F7DC6F;
     color: white;
     border: none;
     cursor: pointer;
@@ -63,16 +63,17 @@
     min-width: 50px;
 }
 #qrButton {
-    background: #28a745;
+    background: #e83e8c;
+    color: white !important;
 }
 #gpsButton:hover {
-    background: #0056b3;
+    background: #e0a800;
 }
 #qrButton:hover {
-    background: #218838;
+    background: #d91a72;
 }
 #gpsButton.locating, #qrButton.scanning {
-    background: #6c757d;
+    background: #6f42c1;
 }
 #result {
     font-size: 14px;
