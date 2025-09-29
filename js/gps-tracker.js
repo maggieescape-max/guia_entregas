@@ -24,7 +24,7 @@ class GPSTracker {
         button.textContent = "🔄";
         button.classList.add('locating');
         
-        window.mapLoader.getMap().lococate({ 
+        window.mapLoader.getMap().locate({ 
             setView: true, 
             maxZoom: 16,
             timeout: 10000 
