@@ -11,6 +11,7 @@ class MainApp {
         // 2. Esperar a que los polígonos estén cargados
         document.addEventListener('polygonsLoaded', (e) => {
             const polygons = e.detail.polygons;
+            const equipos = e.detail.equipos; // NUEVA CAPA
             
             // 3. Inicializar componentes
             window.searchEngine = new SearchEngine(polygons);
