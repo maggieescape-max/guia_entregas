@@ -96,10 +96,22 @@ class MapLoader {
                     const clave = feature.properties.clavemnz || 'N/A';                   
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
                     layer.bindPopup(`
-                        <div style="text-align: center; padding: 5px; width: auto; display: inline-block;">                    
-                            <span style="font-size: 16px; color: blue;">${clave}</span>
-                        </div>
-                    `);
+                        <div style="
+                            text-align: center; 
+                            padding: 6px 10px; 
+                            background: white; 
+                            border-radius: 4px; 
+                            border: 1px solid #b8d4ff;
+                            box-shadow: 0 2px 6px rgba(0,123,255,0.2);
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: #0056b3;
+                        ">${clave}</div>
+                    `, {
+                        maxWidth: 120,
+                        minWidth: 60,
+                        autoPan: false
+                    });
                 }
             }).addTo(this.map);
             // ⭐ CLAVE: Forzar que los polígonos azules estén SIEMPRE encima
