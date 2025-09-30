@@ -15,25 +15,52 @@ class QRScanner {
         });
     }
 
+//____________________
+
     iniciarQRScanner() {
-        document.getElementById('qrModal').style.display = 'flex';
-        document.getElementById('qrButton').classList.add('scanning');
-        document.getElementById('result').innerHTML = ""; // Limpiar mensajes anteriores
+        // FIX iOS: Asegurar que el modal esté visible antes de la cámara
+        const modal = document.getElementById('qrModal');
+        modal.style.display = 'flex';
+    
+        // FIX iOS: Pequeño delay para que Safari renderice el modal
+        setTimeout(() => {
+            document.getElementById('qrButton').classList.add('scanning');
         
-        const video = document.getElementById('qrVideo');
+            const video = document.getElementById('qrVideo');
         
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then((stream) => {
-                this.stream = stream;
-                video.srcObject = stream;
-                video.play();
-                this.scanQR();
-            })
-            .catch((err) => {
-                document.getElementById('result').innerHTML = "❌ Error cámara: " + err.message;
-                this.stopQRScanner();
-            });
+            // Configuración ESPECÍFICA para iOS
+            const constraints = {
+                video: { 
+                    facingMode: "environment",
+                    // Parámetros para mejor compatibilidad iOS
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    frameRate: { ideal: 30 }
+                }
+            };
+        
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then((stream) => {
+                    this.stream = stream;
+                    video.srcObject = stream;
+                
+                    // FIX iOS: Esperar a que el video esté listo
+                    video.onloadedmetadata = () => {
+                        video.play().catch(e => {
+                            console.error("Error reproduciendo video:", e);
+                        });
+                    };
+                
+                    this.scanQR();
+                })
+                .catch((err) => {
+                    console.error("Error cámara iOS:", err);
+                    document.getElementById('result').innerHTML = "❌ Error cámara: " + err.message;
+                    this.stopQRScanner();
+                });
+        }, 100); // Pequeño delay para iOS
     }
+//_______________
 
     scanQR() {
         const video = document.getElementById('qrVideo');
@@ -83,23 +110,58 @@ class QRScanner {
     }
 
     stopQRScanner() {
+        console.log("🔴 Cerrando scanner QR - iOS fix");
+    
+        // 1. Ocultar modal inmediatamente
         const modal = document.getElementById('qrModal');
         modal.style.display = 'none';
     
-        // Limpiar completamente el video
+        // 2. Limpiar el video AGGRESIVAMENTE para iOS
         const video = document.getElementById('qrVideo');
-        video.srcObject = null;
-        video.load();
-    
-        // Forzar redibujado específico para iOS
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            setTimeout(() => {
-                document.body.style.transform = 'translateZ(0)';
-                setTimeout(() => document.body.style.transform = '', 100);
-            }, 300);
+        if (video) {
+            video.pause();
+            video.srcObject = null;
+            video.src = '';
+            video.load();
         }
     
+        // 3. Detener stream COMPLETAMENTE
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => {
+                track.stop();
+                track.enabled = false;
+            });
+            this.stream = null;
+        }
+    
+        // 4. FIX ESPECÍFICO PARA iOS - Reactivar la interfaz
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            // Forzar reinicio de la capa de composición
+            document.body.style.webkitTransform = 'translateZ(0)';
+            document.body.style.transform = 'translateZ(0)';
+        
+            // Trigger reflow múltiple
+            void document.body.offsetWidth;
+            void document.body.offsetHeight;
+        
+            // Timeout para asegurar que iOS procese los cambios
+            setTimeout(() => {
+                document.body.style.webkitTransform = '';
+                document.body.style.transform = '';
+                // Forzar redibujado del mapa
+                if (window.mapLoader && window.mapLoader.getMap()) {
+                    window.mapLoader.getMap().invalidateSize();
+                }
+            }, 100);
+        }
+
+//_______________
+    
         document.getElementById('qrButton').classList.remove('scanning');
+        document.getElementById('qrButton').textContent = "📷";
+        console.log("✅ Scanner QR cerrado completamente");
+
+//______________
         
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
