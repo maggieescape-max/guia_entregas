@@ -96,7 +96,7 @@ class MapLoader {
                     const clave = feature.properties.clavemnz || 'N/A';                   
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
                     layer.bindPopup(`
-                        <div style="text-align: center; padding: 10px;">                            
+                        <div style="text-align: center; padding: 5px; width: auto; display: inline-block;">                    
                             <span style="font-size: 16px; color: blue;">${clave}</span>
                         </div>
                     `);
