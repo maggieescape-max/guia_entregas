@@ -82,25 +82,15 @@ class MapLoader {
                 }
             }).addTo(this.map);
 
-            // CAPA 2: Áreas de equipos (ROSA) - SOLO ETIQUETAS
-            this.equiposLayer = L.geoJSON(datosEquiposFiltrados, {
-                style: { 
-                    color: '#ff00ff',
-                    weight: 3,
-                    fillColor: 'transparent',
-                    fillOpacity: 0
-                },
-                onEachFeature: (feature, layer) => {
-                    // SOLO ETIQUETAS - sin popup (80 es manejable)
-                    this.addTeamLabel(feature, layer);
-                }
-            }).addTo(this.map);
+//_________________
+// Aqui codigo de capa 2
+//_________________
 
             // Notificar que ambas capas están listas
             document.dispatchEvent(new CustomEvent('polygonsLoaded', { 
                 detail: { 
                     polygons: this.polygons,
-                    equipos: this.equiposLayer 
+                    //equipos: this.equiposLayer 
                 } 
             }));
         
