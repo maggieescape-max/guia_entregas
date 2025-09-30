@@ -6,14 +6,34 @@ class SearchEngine {
     }
 
     setupSearch() {
-        // Buscar al presionar ENTER
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        const searchInput = document.getElementById('searchInput');
+    
+        // LIMITAR a 9 caracteres + feedback
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 9) {
+                e.target.value = e.target.value.slice(0, 9);
+                // Feedback visual opcional
+                document.getElementById('result').innerHTML = "Máximo 9 dígitos";
+                setTimeout(() => document.getElementById('result').innerHTML = "", 2000);
+            }
+        
+            // Mostrar contador (opcional)
+            const counter = e.target.value.length;
+            if (counter === 9) {
+                searchInput.style.borderColor = "#28a745"; // Verde cuando está completo
+            } else {
+                searchInput.style.borderColor = "#ddd"; // Gris normal
+            }
+        });
+    
+        // BUSCAR al presionar ENTER
+        searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.ejecutarBusqueda();
             }
         });
-        
-        // Buscar al hacer click en el botón
+    
+        // BUSCAR al hacer click en el botón
         document.getElementById('searchButton').addEventListener('click', () => {
             this.ejecutarBusqueda();
         });
