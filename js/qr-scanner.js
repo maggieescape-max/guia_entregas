@@ -83,7 +83,22 @@ class QRScanner {
     }
 
     stopQRScanner() {
-        document.getElementById('qrModal').style.display = 'none';
+        const modal = document.getElementById('qrModal');
+        modal.style.display = 'none';
+    
+        // Limpiar completamente el video
+        const video = document.getElementById('qrVideo');
+        video.srcObject = null;
+        video.load();
+    
+        // Forzar redibujado específico para iOS
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            setTimeout(() => {
+                document.body.style.transform = 'translateZ(0)';
+                setTimeout(() => document.body.style.transform = '', 100);
+            }, 300);
+        }
+    
         document.getElementById('qrButton').classList.remove('scanning');
         
         if (this.stream) {
