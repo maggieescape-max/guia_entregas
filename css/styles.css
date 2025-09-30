@@ -27,13 +27,7 @@
         padding: 10px !important;
     }
 }
-.polygon-label {
-    font-weight: bold;
-    font-size: 11px;
-    text-shadow: 1px 1px 2px white;
-    pointer-events: none !important; /* No reciben clicks */
-    text-align: center;
-}
+
 #searchInput, #mapSelector {
     width: 100%;
     padding: 8px;
@@ -299,4 +293,5 @@
     background: rgba(255, 255, 255, 0.7);
     padding: 2px 6px;
     border-radius: 4px;
+    pointer-events: none !important;  /* ← Y también aquí */
 }
