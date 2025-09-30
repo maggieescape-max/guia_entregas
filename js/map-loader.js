@@ -67,10 +67,10 @@ class MapLoader {
             console.log(`Features válidos - Equipos: ${datosEquiposFiltrados.features.length}/${datosEquipos.features.length}`);
       
             // CAPA 1: Polígonos de búsqueda (AZUL) - SOLO POPUPS
-            this.polygons = L.geoJSON(datosBusqueda, {
+            this.polygons = L.geoJSON(datosBusquedaFiltrados, {
                 style: { 
                     color: 'blue', 
-                    weight: 2,
+                    weight: 1,
                     fillColor: 'transparent',
                     fillOpacity: 0
                 },
@@ -78,8 +78,7 @@ class MapLoader {
                     const clave = feature.properties.clavemnz || 'N/A';
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
                     layer.bindPopup(`
-                        <div style="text-align: center; padding: 10px;">
-                            <strong>🔍 Clave de Búsqueda</strong><br>
+                        <div style="text-align: center; padding: 10px;">                            
                             <span style="font-size: 18px; color: blue;">${clave}</span>
                         </div>
                     `);
