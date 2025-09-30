@@ -70,23 +70,24 @@ class MapLoader {
             this.polygons = L.geoJSON(datosBusquedaFiltrados, {
                 style: { 
                     color: 'blue', 
-                    weight: 1,
+                    weight: 2,
                     fillColor: 'transparent',
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
                     const clave = feature.properties.clavemnz || 'N/A';
+                    console.log("🟦 Popup para polígono azul:", clave); // DEBUG
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
                     layer.bindPopup(`
                         <div style="text-align: center; padding: 10px;">                            
-                            <span style="font-size: 18px; color: blue;">${clave}</span>
+                            <span style="font-size: 16px; color: blue;">${clave}</span>
                         </div>
                     `);
                 }
             }).addTo(this.map);
 
             // CAPA 2: Áreas de equipos (ROSA) - SOLO ETIQUETAS
-            this.equiposLayer = L.geoJSON(datosEquipos, {
+            this.equiposLayer = L.geoJSON(datosEquiposFiltrados, {
                 style: { 
                     color: '#ff00ff',
                     weight: 3,
