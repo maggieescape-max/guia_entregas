@@ -31,7 +31,7 @@
     font-weight: bold;
     font-size: 11px;
     text-shadow: 1px 1px 2px white;
-    pointer-events: none;
+    pointer-events: none !important; /* No reciben clicks */
     text-align: center;
 }
 #searchInput, #mapSelector {
@@ -282,7 +282,7 @@
 
 .team-label {
     font-weight: bold;
-    pointer-events: none;
+    pointer-events: none !important; /* No reciben clicks */
     text-align: center;
 }
 
