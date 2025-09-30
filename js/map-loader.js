@@ -110,43 +110,21 @@ class MapLoader {
         });
     }
 
-    // Versión ultra-segura... Etiqueta para polígonos de búsqueda - CON VALIDACIÓN
-    addPolygonLabel(feature, layer, texto) {
-        try {
-            // Validaciones de geometría primero
-            if (!layer || !layer.getBounds) return;
-            const bounds = layer.getBounds();
-            if (!bounds || !bounds.isValid()) return;
-    
-            var center = bounds.getCenter();
-            var label = L.marker(center, {
-                icon: L.divIcon({
-                    className: 'polygon-label',
-                    html: texto,
-                    iconSize: [100, 20]
-                }),
-                interactive: false
-            }).addTo(this.map);
-        
-            // ESCONDER etiqueta si el zoom está muy alejado
-            const updateLabelVisibility = () => {
-                const zoom = this.map.getZoom();
-                if (zoom < 12) {
-                    label.getElement().style.display = 'none';
-                } else {
-                    label.getElement().style.display = '';
-                }
-            };
-        
-            // Actualizar visibilidad al cambiar zoom
-            this.map.on('zoomend', updateLabelVisibility);
-            // Establecer visibilidad inicial
-            updateLabelVisibility();
-    
-        } catch (error) {
-            console.warn("Error creando etiqueta:", feature.properties, error);
+    // CAPA 1: Polígonos de búsqueda (AZUL)
+    this.polygons = L.geoJSON(datosBusquedaFiltrados, {
+        style: { 
+            color: 'blue', 
+            weight: 2,
+            fillColor: 'transparent',
+            fillOpacity: 0
+        },
+        onEachFeature: (feature, layer) => {
+            const clave = feature.properties.clavemnz || 'N/A';
+            // SOLO el popup - SIN etiqueta
+            layer.bindPopup('CVE_CAT: ' + clave);
+            // this.addPolygonLabel(feature, layer, clave); ← ELIMINAR ESTA LÍNEA
         }
-    }
+    }).addTo(this.map);
 
     // Etiqueta para equipos - CON VALIDACIÓN
     addTeamLabel(feature, layer) {
