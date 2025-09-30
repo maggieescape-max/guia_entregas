@@ -113,10 +113,7 @@ class MapLoader {
     // Versión ultra-segura... Etiqueta para polígonos de búsqueda - CON VALIDACIÓN
     addPolygonLabel(feature, layer, texto) {
         try {
-            // NO crear etiquetas si el zoom está muy alejado (mejor performance)
-            if (this.map.getZoom() < 12) return;
-        
-            // Validaciones de geometría
+            // Validaciones de geometría primero
             if (!layer || !layer.getBounds) return;
             const bounds = layer.getBounds();
             if (!bounds || !bounds.isValid()) return;
@@ -128,8 +125,23 @@ class MapLoader {
                     html: texto,
                     iconSize: [100, 20]
                 }),
-                interactive: false  // ← NO BLOQUEA CLICKS
+                interactive: false
             }).addTo(this.map);
+        
+            // ESCONDER etiqueta si el zoom está muy alejado
+            const updateLabelVisibility = () => {
+                const zoom = this.map.getZoom();
+                if (zoom < 12) {
+                    label.getElement().style.display = 'none';
+                } else {
+                    label.getElement().style.display = '';
+                }
+            };
+        
+            // Actualizar visibilidad al cambiar zoom
+            this.map.on('zoomend', updateLabelVisibility);
+            // Establecer visibilidad inicial
+            updateLabelVisibility();
     
         } catch (error) {
             console.warn("Error creando etiqueta:", feature.properties, error);
@@ -139,9 +151,6 @@ class MapLoader {
     // Etiqueta para equipos - CON VALIDACIÓN
     addTeamLabel(feature, layer) {
         try {
-            // NO crear etiquetas si el zoom está muy alejado (mejor performance)
-            if (this.map.getZoom() < 12) return;
-
             // VALIDAR que el polígono tenga bounds válidos
             if (!layer.getBounds || !layer.getBounds().isValid()) {
                 console.warn("Polígono equipo sin geometría válida:", feature.properties);
