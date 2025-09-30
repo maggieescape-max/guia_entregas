@@ -66,6 +66,24 @@ class MapLoader {
             console.log(`Features válidos - Búsqueda: ${datosBusquedaFiltrados.features.length}/${datosBusqueda.features.length}`);
             console.log(`Features válidos - Equipos: ${datosEquiposFiltrados.features.length}/${datosEquipos.features.length}`);
       
+//_________________
+
+            // CAPA 2: Áreas de equipos (ROSA) - SOLO ETIQUETAS
+            this.equiposLayer = L.geoJSON(datosEquiposFiltrados, {
+                style: { 
+                    color: '#ff00ff',
+                    weight: 3,
+                    fillColor: 'transparent',
+                    fillOpacity: 0
+                },
+                onEachFeature: (feature, layer) => {
+                    // SOLO ETIQUETAS - sin popup (80 es manejable)
+                    this.addTeamLabel(feature, layer);
+                }
+            }).addTo(this.map);
+
+//_________________
+
             // CAPA 1: Polígonos de búsqueda (AZUL) - SOLO POPUPS
             this.polygons = L.geoJSON(datosBusquedaFiltrados, {
                 style: { 
@@ -75,22 +93,23 @@ class MapLoader {
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
-                    const clave = feature.properties.clavemnz || 'N/A';
-                    console.log("🟦 Popup para polígono azul:", clave); // DEBUG
+                    const clave = feature.properties.clavemnz || 'N/A';                   
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
-                    layer.bindPopup(clave);
+                    layer.bindPopup(`
+                        <div style="text-align: center; padding: 10px;">                            
+                            <span style="font-size: 16px; color: blue;">${clave}</span>
+                        </div>
+                    `);
                 }
             }).addTo(this.map);
-
-//_________________
-// Aqui codigo de capa 2
-//_________________
+            // ⭐ CLAVE: Forzar que los polígonos azules estén SIEMPRE encima
+            this.polygons.bringToFront();
 
             // Notificar que ambas capas están listas
             document.dispatchEvent(new CustomEvent('polygonsLoaded', { 
                 detail: { 
                     polygons: this.polygons,
-                    //equipos: this.equiposLayer 
+                    equipos: this.equiposLayer 
                 } 
             }));
         
