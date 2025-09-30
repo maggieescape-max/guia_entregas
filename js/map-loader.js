@@ -88,28 +88,16 @@ class MapLoader {
             this.polygons = L.geoJSON(datosBusquedaFiltrados, {
                 style: { 
                     color: 'blue', 
-                    weight: 2,
+                    weight: 1,
                     fillColor: 'transparent',
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
                     const clave = feature.properties.clavemnz || 'N/A';                   
                     // SOLO POPUP - sin etiquetas (6,000 es mucho)
-                    layer.bindPopup(`
-                        <div style="
-                            text-align: center; 
-                            padding: 6px 10px; 
-                            background: white; 
-                            border-radius: 4px; 
-                            border: 1px solid #b8d4ff;
-                            box-shadow: 0 2px 6px rgba(0,123,255,0.2);
-                            font-size: 14px;
-                            font-weight: bold;
-                            color: #0056b3;
-                        ">${clave}</div>
-                    `, {
-                        maxWidth: 120,
-                        minWidth: 60,
+                    layer.bindPopup(`<strong style="font-size: 14px; color: #007bff;">${clave}</strong>`, {
+                        className: 'minimal-popup',
+                        maxWidth: 150,
                         autoPan: false
                     });
                 }
