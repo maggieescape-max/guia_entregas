@@ -14,6 +14,7 @@
     max-width: 300px;
     width: auto;
 }
+
 /* Para móviles */
 @media (max-width: 768px) {
     #search {
@@ -25,6 +26,7 @@
     #searchInput, #mapSelector, #gpsButton, #qrButton {
         font-size: 16px !important;
         padding: 10px !important;
+        touch-action: manipulation;
     }
 }
 
@@ -90,6 +92,8 @@
     justify-content: center;
     align-items: center;
     font-family: 'Courier New', monospace;
+    -webkit-overflow-scrolling: touch; /* Scroll suave iOS */
+    transform: translateZ(0); /* Aceleración hardware */
 }
 
 #qrScanner {
@@ -161,6 +165,8 @@
         inset 0 0 20px rgba(0, 255, 0, 0.1);
     display: block;
     margin: 0 auto;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 /* Contenedor del video con overlay */
